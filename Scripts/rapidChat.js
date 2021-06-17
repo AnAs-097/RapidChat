@@ -43,7 +43,9 @@ function openChat(fKey,fName,fPhotoUrl) {
         document.getElementById('textInputField').focus();
         
         loadChat(chatSessionKey);
-        document.getElementById('messageList').scrollTo(0,document.getElementById('messageList').clientHeight);
+        //document.getElementById('messageList').scrollTo(0,document.getElementById('messageList').clientHeight);
+        //var messageBody = document.querySelector('#messageList');
+        //messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
     });
     
 }
@@ -72,7 +74,9 @@ function send(msg){
             
             
         
-            document.getElementById('messageList').scrollTo(0,document.getElementById('messageList').clientHeight);
+            // document.getElementById('messageList').scrollTo(0,document.getElementById('messageList').clientHeight);
+             var messageBody = document.querySelector('#messageList');
+             messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
         }
     });
 
@@ -96,7 +100,9 @@ function loadChat(chatSessionKey) {
             }
         });
         document.getElementById('messageList').innerHTML = message;
-        document.getElementById('messageList').scrollTo(0,document.body.scrollHeight);
+        //document.getElementById('messageList').scrollTo(0,document.body.scrollHeight);
+        var messageBody = document.querySelector('#messageList');
+        messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
     });
     document.getElementById('messageList').scrollTo(0,document.body.scrollHeight);
 }
