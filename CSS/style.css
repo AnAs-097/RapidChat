@@ -12,6 +12,12 @@ body {
     background-image:linear-gradient(160deg, #9b9292, #e5e5e5);
 }
 
+.icon {
+    font-size: 20px;
+    color: #9CA1A3;
+    cursor: pointer;
+}
+
 .backTop {
     height:150px;
     width:100%;
@@ -85,5 +91,9 @@ body {
 }
 
 .dropdown-toggle::before{
+    display: none !important;
+}
+
+.dropdown-toggle::after{
     display: none !important;
 }

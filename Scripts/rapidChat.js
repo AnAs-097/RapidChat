@@ -71,15 +71,38 @@ function send(msg){
     firebase.database().ref('messages').child(chatSessionKey).push(newChatMsg, function(error) {
         if(error) alert(error);
         else {
-            
-            
-        
-            // document.getElementById('messageList').scrollTo(0,document.getElementById('messageList').clientHeight);
              var messageBody = document.querySelector('#messageList');
              messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
         }
     });
 
+}
+
+function selectImage(){
+    document.getElementById('imgFile').click();
+}
+
+function sendImg(event){
+    var file = event.files[0];
+    if(!file.type.match("image.*")){
+        alert("File type missmatch");
+    }
+    else{
+        var fileReader = new FileReader();
+        fileReader.addEventListener("load",function(){
+            var newChatMsg = {senderId: currentUserId,msg: fileReader.result, date: new Date().toLocaleString()};
+            firebase.database().ref('messages').child(chatSessionKey).push(newChatMsg, function(error) {
+                if(error) alert(error);
+                else {
+                     var messageBody = document.querySelector('#messageList');
+                     messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
+                }
+            });
+         }, false);
+        if(file) {
+            fileReader.readAsDataURL(file);
+        }
+    }
 }
 
 //////////////////////////////////////////////
