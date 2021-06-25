@@ -115,11 +115,18 @@ function loadChat(chatSessionKey) {
         messages.forEach(function (messageData){
             var messageVal = messageData.val();
             var dateTime = messageVal.date.split(',');
-            if(messageVal.senderId===currentUserId){
-                message += '<div class="row justify-content-end"><div class="col-6 col-sm-7 col-md-7" style="display: inline-block;"><p class="message-send-element float-right">' + messageVal.msg +' <span class="message-time float-right" title="' + dateTime[0] +'">' + dateTime[1] +'</span></p></div></div> ';
+            var msg = '';
+            if(messageVal.msg.indexOf("base64") !== -1){
+                msg = '<img src = "'+ messageVal.msg+'" class = "img-fluid"/>'
             }
             else{
-                message += '<div class="row"><div class="col-6 col-sm-7 col-md-7" style="display: inline-block;"><p class="message-element">'+ messageVal.msg +' <span class="message-time float-right" title="' + dateTime[0] +'">' + dateTime[1] +'</span></p></div></div>';
+                msg = messageVal.msg
+            }
+            if(messageVal.senderId===currentUserId){
+                message += '<div class="row justify-content-end"><div class="col-6 col-sm-7 col-md-7" style="display: inline-block;"><p class="message-send-element float-right">' + msg +' <span class="message-time float-right" title="' + dateTime[0] +'">' + dateTime[1] +'</span></p></div></div> ';
+            }
+            else{
+                message += '<div class="row"><div class="col-6 col-sm-7 col-md-7" style="display: inline-block;"><p class="message-element">'+ msg +' <span class="message-time float-right" title="' + dateTime[0] +'">' + dateTime[1] +'</span></p></div></div>';
             }
         });
         document.getElementById('messageList').innerHTML = message;
@@ -139,11 +146,9 @@ function loadContacts() {
             var friendId = '';
             if(pair.friendId === currentUserId) {
                 friendId = pair.userId;
-                
             }
             else if(pair.userId === currentUserId) {
                 friendId = pair.friendId;
-                
             }
 
             if(friendId !== ''){
