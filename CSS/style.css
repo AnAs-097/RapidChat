@@ -59,6 +59,7 @@ body {
     border-radius: 1rem;
     padding: 10px 15px;
     display:inline-block;
+    max-width: 500px;
 }
 
 .message-time{
@@ -73,6 +74,7 @@ body {
     border-radius: 1rem;
     padding: 10px 15px;
     display:inline-block;
+    max-width: 500px;
 }
 
 .card{
@@ -96,4 +98,44 @@ body {
 
 .dropdown-toggle::after{
     display: none !important;
+}
+
+audio {
+    filter: sepia(20%) saturate(70%) grayscale(1) contrast(99%) invert(80%);
+    height: 35px;
+}
+
+.anim-container {
+	height:4rem;
+	width:4rem;
+	transition:.3s;
+	position:relative;
+	cursor:pointer;
+	}
+	.anim-container .ic {
+		transition:.3s;
+		position:absolute;
+		font-size:4em !important;
+		height:1em;
+		width:1em;
+	}
+	.anim-container .sendbtn {
+		transform:rotate(-135deg);
+		opacity:0;
+	}
+	
+.anim-container.morphed {
+	transform:rotate(135deg);
+	}
+	.anim-container.morphed .sendbtn {
+		opacity:1;
+	}
+	.anim-container.morphed .mic {
+		opacity:0;
+	}
+
+.anim-container.small {
+	height:2rem;
+	width:2rem;
+	font-size:.5rem;
 }

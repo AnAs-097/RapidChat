@@ -114,9 +114,9 @@
                                 <input id="textInputField" type="text" onkeyup="displaySendButton(this)"
                                     placeholder="Send a message..." class="form-control" />
                             </div>
-                            <div class="col-md-1 col-2">
-                                <i id="mic" class="fas fa-microphone fa-2x"></i>
-                                <i id="send" class="fa fa-send fa-2x" style="display: none;"></i>
+                            <div class="col-md-1 col-2 anim-container small" id="planeMic">
+                                <i id="mic" onclick="recordVoice(this)" class="fas fa-microphone fa-2x ic mic"></i>
+                                <i id="send" class="fa fa-send fa-2x ic sendbtn" style="display: none;"></i>
                             </div>
                         </div>
                     </div>
