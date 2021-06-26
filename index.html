@@ -111,11 +111,12 @@
                                 <i class="fas fa-grin fa-2x"></i>
                             </div>
                             <div class="col-md-10 col-8">
-                                <input id="textInputField" type="text"
+                                <input id="textInputField" type="text" onkeyup="displaySendButton(this)"
                                     placeholder="Send a message..." class="form-control" />
                             </div>
                             <div class="col-md-1 col-2">
-                                <i class="fas fa-microphone fa-2x"></i>
+                                <i id="mic" class="fas fa-microphone fa-2x"></i>
+                                <i id="send" class="fa fa-send fa-2x" style="display: none;"></i>
                             </div>
                         </div>
                     </div>

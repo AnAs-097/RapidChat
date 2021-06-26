@@ -250,4 +250,15 @@ function populateFriends() {
     });
 }
 
+function displaySendButton(context) {
+    if(context.value!=='') {
+        document.getElementById('send').removeAttribute('style');
+        document.getElementById('mic').setAttribute('style','display: none');
+    }
+    else {
+        document.getElementById('mic').removeAttribute('style');
+        document.getElementById('send').setAttribute('style','display: none');
+    }
+}
+
 onFirebaseStateChanged();
