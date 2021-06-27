@@ -1,9 +1,11 @@
 var currentUserId = '';
+var friendUserId='';
 var chatSessionKey = '';
 var flag = true;
 ////////
 function openChat(fKey, fName, fPhotoUrl) {
     flag = true;
+    friendUserId=fKey;
     var friend = { friendId: fKey, userId: currentUserId };
     var check = false;
 
@@ -71,8 +73,28 @@ function send(msg) {
     firebase.database().ref('messages').child(chatSessionKey).push(newChatMsg, function (error) {
         if (error) alert(error);
         else {
+            firebase.database().ref('fcmtoken').child(friendUserId).once('value').then(function (data) {
+                $.ajax({
+                    url: 'https://fcm.googleapis.com/fcm/send',
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'key=AAAAKTYpMh0:APA91bHXLJR6Q7zPbcxqQXPHbX452LdWHVXDOfuSDvuFn59g6_CzOHDCdlffX4_l9sBCF2EaC4UW9_z3lY_Yo6Fgem9Ge4YPq7071SsnbY69GU52ctDcjnZf7LpuBDEb0dSCJk6b3uur'                        
+                    },
+                    data: JSON.stringify({
+                        'to': data.val().token_id, 'data': { 'message': newChatMsg.msg.substring(0, 30) + '...', 'icon': firebase.auth().currentUser.photoURL }
+                    }),
+                    success: function (response) {
+                        console.log(response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.log(xhr.error);
+                    }
+                });
+            });
             var messageBody = document.querySelector('#messageList');
             messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
+            
         }
     });
 
@@ -209,6 +231,14 @@ function onStateChanged(user) {
 
 
             }
+
+            const messaging = firebase.messaging();
+            messaging.requestPermission().then(function() {
+                return messaging.getToken();
+            }).then(function(token) {
+                firebase.database().ref('fcmtoken').child(currentUserId).set({token_id: token});
+            });
+
             loadContacts();
         });
     }
@@ -255,7 +285,7 @@ function populateFriends() {
 
 function displaySendButton(context) {
 
-    if (context.value === '') {
+    if (context.value === '' && flag === false) {
         document.getElementById('planeMic').classList.toggle('morphed');
         document.getElementById('mic').removeAttribute('style');
         document.getElementById('send').setAttribute('style', 'display: none');
