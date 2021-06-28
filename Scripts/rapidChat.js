@@ -1,15 +1,15 @@
 var currentUserId = '';
-var friendUserId='';
+var friendUserId = '';
 var chatSessionKey = '';
 var flag = true;
 ////////
 function openChat(fKey, fName, fPhotoUrl) {
     flag = true;
-    friendUserId=fKey;
+    friendUserId = fKey;
     var friend = { friendId: fKey, userId: currentUserId };
     var check = false;
 
-    var db = firebase.database().ref('friendsList');
+    var db = firebase.database().ref('friend_list');
     db.on('value', function (friends) {
         friends.forEach(function (data) {
             var user = data.val();
@@ -21,7 +21,7 @@ function openChat(fKey, fName, fPhotoUrl) {
         });
 
         if (check === false) {
-            chatSessionKey = firebase.database().ref('friendsList').push(friend, function (error) {
+            chatSessionKey = firebase.database().ref('friend_list').push(friend, function (error) {
                 if (error) {
                     alert(error);
                 }
@@ -55,7 +55,7 @@ function openChat(fKey, fName, fPhotoUrl) {
 
 function enterPressed() {
     document.addEventListener('keyup', function (key) {
-        if (key.which == 13) {
+        if (key.which == 13 ) {
             var msg = document.getElementById('textInputField').value
             if (msg !== '') {
 
@@ -66,6 +66,15 @@ function enterPressed() {
 
         }
     });
+}
+function sendClick() {
+    var msg = document.getElementById('textInputField').value;
+    if (msg !== '') {
+
+        document.getElementById('textInputField').value = '';
+        document.getElementById('textInputField').focus();
+        send(msg);
+    }
 }
 
 function send(msg) {
@@ -79,7 +88,7 @@ function send(msg) {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'key=AAAAKTYpMh0:APA91bHXLJR6Q7zPbcxqQXPHbX452LdWHVXDOfuSDvuFn59g6_CzOHDCdlffX4_l9sBCF2EaC4UW9_z3lY_Yo6Fgem9Ge4YPq7071SsnbY69GU52ctDcjnZf7LpuBDEb0dSCJk6b3uur'                        
+                        'Authorization': 'key=AAAAKTYpMh0:APA91bHXLJR6Q7zPbcxqQXPHbX452LdWHVXDOfuSDvuFn59g6_CzOHDCdlffX4_l9sBCF2EaC4UW9_z3lY_Yo6Fgem9Ge4YPq7071SsnbY69GU52ctDcjnZf7LpuBDEb0dSCJk6b3uur'
                     },
                     data: JSON.stringify({
                         'to': data.val().token_id, 'data': { 'message': newChatMsg.msg.substring(0, 30) + '...', 'icon': firebase.auth().currentUser.photoURL }
@@ -94,7 +103,7 @@ function send(msg) {
             });
             var messageBody = document.querySelector('#messageList');
             messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
-            
+
         }
     });
 
@@ -163,7 +172,10 @@ function loadChat(chatSessionKey) {
 }
 
 function loadContacts() {
-    var datab = firebase.database().ref('friendsList');
+    document.getElementById('loginBtnFront').style = 'display: none';
+    document.getElementById('logoutBtnFront').style='';
+
+    var datab = firebase.database().ref('friend_list');
     datab.on('value', function (pairs) {
         document.getElementById('contactList').innerHTML = ' <li class="list-group-item" style="background-color:#f8f8f8"><input type="text" placeholder="Search......" class="form-control"/></li>';
         pairs.forEach(function (data) {
@@ -186,14 +198,29 @@ function loadContacts() {
     });
 }
 
+function showChatList() {
+    document.getElementById('side-1').classList.remove('d-none','d-md-block');
+    document.getElementById('side-2').classList.add('d-none');
+}
+
+function hideChatList() {
+    document.getElementById('side-2').classList.remove('d-none','d-md-block');
+    document.getElementById('side-1').classList.add('d-none');
+}
 
 function login() {
     var provider = new firebase.auth.GoogleAuthProvider();
     firebase.auth().signInWithPopup(provider);
+    document.getElementById('loginBtnFront').style = 'display: none';
+    document.getElementById('logoutBtnFront').style='';
+
 }
 
 function logout() {
     firebase.auth().signOut();
+    document.getElementById('logoutBtnFront').style = 'display: none';
+    document.getElementById('loginBtnFront').style='';
+    document.getElementById('contactList').innerHTML='';
 }
 
 function onFirebaseStateChanged() {
@@ -233,13 +260,14 @@ function onStateChanged(user) {
             }
 
             const messaging = firebase.messaging();
-            messaging.requestPermission().then(function() {
+            messaging.requestPermission().then(function () {
                 return messaging.getToken();
-            }).then(function(token) {
-                firebase.database().ref('fcmtoken').child(currentUserId).set({token_id: token});
+            }).then(function (token) {
+                firebase.database().ref('fcmtoken').child(currentUserId).set({ token_id: token });
             });
 
             loadContacts();
+            notifCount();
         });
     }
     else {
@@ -263,24 +291,155 @@ function callback(error) {
     }
 }
 
-function populateFriends() {
-    var fList = document.getElementById('friendList');
+function populateUsers() {
+    var fList = document.getElementById('userList');
     fList.innerHTML = '<div> <span class="spinner-border text-primary mt-5" style="height: 8rem; width:4rem"> </span> </div>';
 
     var datab = firebase.database().ref('users');
+    var databNotif = firebase.database().ref('friendRequests');
     var userList = '';
     datab.on('value', function (users) {
         if (users.hasChildren()) {
             userList = ' <li class="list-group-item" style="background-color:#f8f8f8"><input type="text" placeholder="Search......" class="form-control"/></li>';
-
+            fList.innerHTML = '';
         }
         users.forEach(function (data) {
             var user = data.val();
-            if (user.email !== firebase.auth().currentUser.email)
-                userList += '<li class="list-group-item list-group-item-action" data-dismiss="modal" onclick="openChat(\'' + data.key + '\',\'' + user.name + '\',\'' + user.photoURL + '\')"><div class="row"><div class="col-md-2"><img src="' + user.photoURL + '" class="contact-img" /></div><div class="col-md-10" style="cursor:pointer;"><div class="contact-name">' + user.name + '</div></div></div></li>';
+
+            if (user.email !== firebase.auth().currentUser.email) {
+                databNotif.orderByChild('sendTo').equalTo(data.key).on('value', function (notif) {
+                    //let notiArray = Object.values(notif.val()).filter(n => n.status === 'Pending');
+                    if (notif.numChildren() > 0 && Object.values(notif.val())[0].sendFrom === currentUserId) {
+                        userList = '<li class="list-group-item list-group-item-action" ><div class="row"><div class="col-md-2"><img src="' + user.photoURL + '" class="contact-img" /></div><div class="col-md-10" style="cursor:pointer;"><div class="contact-name">' + user.name + '<button class="btn btn-sm btn-default" style="float: right;"  ><i class="fas fa-check"></i></button></div></div></div></li>';
+                        fList.innerHTML += userList;
+                    }
+                    else {
+                        userList = '<li class="list-group-item list-group-item-action" data-dismiss="modal" ><div class="row"><div class="col-md-2"><img src="' + user.photoURL + '" class="contact-img" /></div><div class="col-md-10" style="cursor:pointer;"><div class="contact-name">' + user.name + '<button class="btn btn-sm btn-primary" style="float: right;" onclick="sendRequest(\'' + data.key + '\')" ><i class="fas fa-plus"></i></button></div></div></div></li>';
+                        fList.innerHTML += userList;
+                    }
+                });
+
+            }
+        });
+
+    });
+}
+
+function sendRequest(key) {
+    let notif = {
+        sendTo: key,
+        sendFrom: currentUserId,
+        name: firebase.auth().currentUser.displayName,
+        photo: firebase.auth().currentUser.photoURL,
+        dateTime: new Date().toLocaleString(),
+        status: 'Pending'
+    };
+    firebase.database().ref('friendRequests').push(notif, function (error) {
+        if (error) alert(error);
+        else {
+            populateUsers();
+        }
+    });
+}
+
+function notifCount() {
+    let datab = firebase.database().ref('friendRequests');
+    datab.orderByChild('sendTo').equalTo(currentUserId).on('value', function (notif) {
+        let notiArray = Object.values(notif.val()).filter(n => n.status === 'Pending');
+        document.getElementById('notificationCount').innerHTML = notiArray.length;
+    });
+}
+
+function populateNotifications() {
+    var fList = document.getElementById('notifList');
+    fList.innerHTML = '<div> <span class="spinner-border text-primary mt-5" style="height: 8rem; width:4rem"> </span> </div>';
+
+    var datab = firebase.database().ref('friendRequests');
+    var userList = '';
+    datab.orderByChild('sendTo').equalTo(currentUserId).on('value', function (notif) {
+        if (notif.hasChildren()) {
+            userList = ' <li class="list-group-item" style="background-color:#f8f8f8"><input type="text" placeholder="Search......" class="form-control"/></li>';
+
+        }
+        notif.forEach(function (data) {
+            var notification = data.val();
+            if(notification.status === 'Pending')
+                userList += '<li class="list-group-item list-group-item-action"><div class="row"><div class="col-md-2"><img src="' + notification.photo + '" class="contact-img" /></div><div class="col-md-10" style="cursor:pointer;"><div class="contact-name">' + notification.name + ' <button class="btn btn-sm btn-success" style="float: right;" onclick="acceptRequest(\'' + data.key + '\')" ><i class="fas fa-plus"></i></button><button class="btn btn-sm btn-danger" style="float: right;" onclick="rejectRequest(\'' + data.key + '\')" ><i class="fas fa-times"></i></button></div></div></div></li>';
         });
         fList.innerHTML = userList;
     });
+}
+
+function acceptRequest(key) {
+    // let db = firebase.database().ref('friendRequests').child(key).once('value', function (notif) {
+    //     var obj = notif.val();
+    //     obj.status = "Accept";
+    //     firebase.database().ref('friendRequests').child(key).update(obj, function (error) {
+    //         if (error) alert(error);
+    //         else {
+    //             populateNotifications();
+    //             var friend = { friendId: obj.sendFrom, userId: currentUserId };
+    //             firebase.database().ref('friend_list').push(friend, function (error) {
+    //                 if(error) alert(error);
+    //                 else{
+
+    //                 }
+    //             });
+    //         }
+    //     });
+    // });
+    let db = firebase.database().ref('friendRequests').child(key).once('value', function (noti) {
+        var obj = noti.val();
+        obj.status = 'Accept';
+        firebase.database().ref('friendRequests').child(key).update(obj, function (error) {
+            if (error) alert(error);
+            else {
+                // do something
+                populateNotifications();
+                var friendList = { friendId: obj.sendFrom, userId: obj.sendTo };
+                firebase.database().ref('friend_list').push(friendList, function (error) {
+                    if (error) alert(error);
+                    else {
+                        //do Something
+                    }
+                });
+            }
+        });
+    });
+}
+
+function rejectRequest(key) {
+    let db = firebase.database().ref('friendRequests').child(key).once('value', function (notif) {
+        let obj = notif.val();
+        obj.status = "Reject";
+        firebase.database().ref('friendRequests').child(key).update(obj, function (error) {
+            if (error) alert(error);
+            else {
+                populateNotifications();
+            }
+        });
+    });
+
+}
+
+function populateFriends() {
+    // var fList = document.getElementById('friendList');
+    // fList.innerHTML = '<div> <span class="spinner-border text-primary mt-5" style="height: 8rem; width:4rem"> </span> </div>';
+
+    // var datab = firebase.database().ref('users');
+    // var userList = '';
+    // datab.on('value', function (users) {
+    //     if (users.hasChildren()) {
+    //         userList = ' <li class="list-group-item" style="background-color:#f8f8f8"><input type="text" placeholder="Search......" class="form-control"/></li>';
+
+    //     }
+    //     users.forEach(function (data) {
+    //         var user = data.val();
+    //         if (user.email !== firebase.auth().currentUser.email)
+    //             userList += '<li class="list-group-item list-group-item-action" data-dismiss="modal" onclick="openChat(\'' + data.key + '\',\'' + user.name + '\',\'' + user.photoURL + '\')"><div class="row"><div class="col-md-2"><img src="' + user.photoURL + '" class="contact-img" /></div><div class="col-md-10" style="cursor:pointer;"><div class="contact-name">' + user.name + '</div></div></div></li>';
+    //     });
+    //     fList.innerHTML = userList;
+    // });
 }
 
 function displaySendButton(context) {
@@ -333,7 +492,7 @@ function recordVoice(context) {
                 }
             }
 
-            
+
 
         }
 

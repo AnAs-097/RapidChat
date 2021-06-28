@@ -139,3 +139,17 @@ audio {
 	width:1.5rem;
 	font-size:.5rem;
 }
+
+#notificationCount {
+    background-color: red;
+    border: 1px solid red;
+    border-radius: 50%;
+    position: absolute;
+    margin-top: -10%;
+    font-size: 12px;
+    width: 20%;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    margin-left: -11%; 
+}
